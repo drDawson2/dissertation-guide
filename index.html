@@ -3626,7 +3626,14 @@ WHAT SUCCESS LOOKS LIKE:
                 });
             });
         });
-        
+       // EXPAND ALL SECTIONS BY DEFAULT
+    document.querySelectorAll('.collapsible-content').forEach(content => {
+        content.classList.remove('hidden');
+    });
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.classList.remove('collapsed');
+    });
+});   
         // ==========================================
         // COPY TO CLIPBOARD FUNCTIONALITY
         // ==========================================
@@ -3801,4 +3808,5 @@ WHAT SUCCESS LOOKS LIKE:
     </script>
 </body>
 </html>
+
 
