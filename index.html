@@ -399,13 +399,14 @@
         }
         
         .collapsible-content {
-            max-height: 5000px;
-            overflow: hidden;
+            max-height: none;
+            overflow: visible;
             transition: max-height 0.3s ease-out;
         }
         
         .collapsible-content.hidden {
             max-height: 0;
+            overflow: hidden;
         }
         
         .section {
@@ -3801,6 +3802,7 @@ WHAT SUCCESS LOOKS LIKE:
     </script>
 </body>
 </html>
+
 
 
 
