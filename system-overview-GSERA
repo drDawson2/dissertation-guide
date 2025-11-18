@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Assisted Dissertation System - GSERA Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #CC0000;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .slide {
+            flex: 1;
+            display: none;
+            padding: 60px 80px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            color: #CC0000;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 2.5em;
+            font-weight: 600;
+            margin-bottom: 0.8em;
+            color: #CC0000;
+        }
+        
+        h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 0.6em;
+            color: #fff;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #aaa;
+            margin-bottom: 2em;
+        }
+        
+        ul {
+            list-style: none;
+            font-size: 1.4em;
+            line-height: 1.8;
+        }
+        
+        ul li {
+            margin: 0.8em 0;
+            padding-left: 1.5em;
+            position: relative;
+        }
+        
+        ul li:before {
+            content: "▸";
+            color: #CC0000;
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3em;
+            margin-top: 2em;
+        }
+        
+        .diagram {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 2em;
+            margin: 2em 0;
+        }
+        
+        .box {
+            background: #1a1a1a;
+            border: 2px solid #CC0000;
+            border-radius: 8px;
+            padding: 1.5em;
+            margin: 1em 0;
+            font-size: 1.2em;
+        }
+        
+        .box-title {
+            color: #CC0000;
+            font-weight: 600;
+            margin-bottom: 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .emphasis {
+            color: #CC0000;
+            font-weight: 600;
+        }
+        
+        .screenshot-placeholder {
+            background: #1a1a1a;
+            border: 2px dashed #666;
+            border-radius: 8px;
+            padding: 3em;
+            text-align: center;
+            color: #888;
+            font-size: 1.3em;
+            margin: 1.5em 0;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        button {
+            background: #CC0000;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #990000;
+        }
+        
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+        
+        .notes-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 3px solid #CC0000;
+            padding: 20px 40px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            z-index: 50;
+        }
+        
+        .notes-container.visible {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .notes-content {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #ddd;
+        }
+        
+        .notes-content ul {
+            font-size: 1em;
+            margin-left: 1em;
+        }
+        
+        .slide-number {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2em 0;
+        }
+        
+        .flow-box {
+            background: #1a1a1a;
+            border: 2px solid #CC0000;
+            padding: 1.2em;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            margin: 0 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .flow-arrow {
+            color: #CC0000;
+            font-size: 2em;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5em;
+            margin: 2em 0;
+        }
+        
+        .card {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 1.5em;
+        }
+        
+        .card-title {
+            color: #CC0000;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active" data-notes="Introduction to AI-assisted system for dissertation management. Emphasize this is optional resource now available to all program students.">
+            <div class="slide-content">
+                <h1>AI-Assisted Dissertation<br>Management System</h1>
+                <p class="subtitle">Building Sustainable Research Workflows</p>
+                <p class="subtitle" style="font-size: 1.2em; margin-top: 2em;">GSERA Presentation</p>
+            </div>
+        </div>
+        
+        <!-- Slide 2: The Challenge -->
+        <div class="slide" data-notes="Set context: students managing dissertation + full-time work + life. Goal is sustainable progress, not just time management.">
+            <div class="slide-content">
+                <h2>Your Dissertation Challenge</h2>
+                <ul>
+                    <li>Managing dissertation while working full-time</li>
+                    <li>Balancing family and life responsibilities</li>
+                    <li>Producing rigorous doctoral-level scholarship</li>
+                    <li>Making consistent progress without burnout</li>
+                </ul>
+                <div class="box" style="margin-top: 2em;">
+                    <div class="box-title">The Core Need</div>
+                    Sustainable research workflows that support your scholarship<br>while respecting your reality as working professionals
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: What the System Supports -->
+        <div class="slide" data-notes="Five key areas system addresses. Emphasize live project management vs static file systems.">
+            <div class="slide-content">
+                <h2>What This System Supports</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Literature organization & synthesis</li>
+                            <li>Theoretical framework development</li>
+                            <li>Data collection & analysis</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>Document consistency tracking</li>
+                            <li><span class="emphasis">Live project management</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 2em;">
+                    Not static file systems — dynamic, integrated workflows that grow with you
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Five Modules -->
+        <div class="slide" data-notes="Modular design: build what you need when you need it. Built-in stopping points respect time constraints.">
+            <div class="slide-content">
+                <h2>Five Modular Components</h2>
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="card-title">Module 1</div>
+                        Reference & Knowledge Management
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Module 2</div>
+                        Theoretical Framework
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Module 3</div>
+                        Literature Review
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Module 4</div>
+                        Qualitative Analysis
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Module 5</div>
+                        Project Management
+                    </div>
+                    <div class="card" style="border: 2px solid #CC0000;">
+                        <div class="card-title">Key Feature</div>
+                        Build incrementally as needed
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: AI Role - Colleague Model -->
+        <div class="slide" data-notes="Critical framing: AI as knowledgeable colleague in study session. Not ghostwriter, not decision maker.">
+            <div class="slide-content">
+                <h2>How AI Fits: The Colleague Model</h2>
+                <div class="flow-diagram">
+                    <div class="flow-box">You explain<br>your work</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">AI asks<br>questions</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">You make<br>decisions</div>
+                </div>
+                <h3 style="margin-top: 1.5em;">AI serves as:</h3>
+                <div class="two-column">
+                    <ul>
+                        <li>Strategic consultant<br><span style="color: #666; font-size: 0.8em;">(not a ghostwriter)</span></li>
+                        <li>Thinking partner<br><span style="color: #666; font-size: 0.8em;">(not a decision maker)</span></li>
+                    </ul>
+                    <ul>
+                        <li>Structure builder<br><span style="color: #666; font-size: 0.8em;">(not content generator)</span></li>
+                        <li>Accountability coach<br><span style="color: #666; font-size: 0.8em;">(not task automator)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Academic Integrity - What AI Does -->
+        <div class="slide" data-notes="VERY explicit boundaries. Emphasize: AI helps you think more clearly, never thinks FOR you.">
+            <div class="slide-content">
+                <h2>Academic Integrity: What AI Does</h2>
+                <div class="box" style="background: #1a1a1a; border-color: #0a0;">
+                    <div class="box-title" style="color: #0a0;">✓ Appropriate Uses</div>
+                    <ul style="font-size: 1em;">
+                        <li>Provides organizational frameworks</li>
+                        <li>Offers synthesis strategies</li>
+                        <li>Asks clarifying questions to refine YOUR thinking</li>
+                        <li>Identifies gaps in YOUR reasoning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Academic Integrity - What AI Does NOT Do -->
+        <div class="slide" data-notes="Critical boundary: If you can't explain without referencing AI, you've crossed the line into dependence.">
+            <div class="slide-content">
+                <h2>Academic Integrity: What AI Does NOT Do</h2>
+                <div class="box" style="background: #1a1a1a; border-color: #a00;">
+                    <div class="box-title" style="color: #ff6666;">✗ Inappropriate Uses</div>
+                    <ul style="font-size: 1em;">
+                        <li>Write your dissertation</li>
+                        <li>Analyze your research data</li>
+                        <li>Make methodological decisions for you</li>
+                        <li>Replace your scholarly judgment</li>
+                    </ul>
+                </div>
+                <div class="box" style="margin-top: 1.5em; border-color: #CC0000;">
+                    <div class="box-title">The Test</div>
+                    If you can't explain a concept without referencing the AI conversation,<br>
+                    you've crossed from <span class="emphasis">consultation</span> into <span class="emphasis">dependence</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Demo Title -->
+        <div class="slide" data-notes="Transition to concrete demonstration using Module 1 (Zotero + Obsidian).">
+            <div class="slide-content">
+                <h2>Module 1 in Action</h2>
+                <h3>Reference & Knowledge Management</h3>
+                <div class="flow-diagram" style="margin-top: 2em;">
+                    <div class="flow-box" style="border-color: #0a0;">
+                        <strong>Zotero</strong><br>
+                        Reference Storage
+                    </div>
+                    <div class="flow-arrow">⟷</div>
+                    <div class="flow-box" style="border-color: #0a0;">
+                        <strong>Obsidian</strong><br>
+                        Knowledge Synthesis
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 2em; font-size: 1.3em; color: #aaa;">
+                    Separate storage from synthesis, maintain seamless flow
+                </p>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Zotero Structure -->
+        <div class="slide" data-notes="Show collection structure aligned with dissertation chapters. Multi-dimensional tagging adds priority and themes.">
+            <div class="slide-content">
+                <h2>Zotero: Organized by Chapter</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <div style="margin: 0.5em 0;">📁 Dissertation - [Your Project]</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">📂 1. Core Theory & Framework</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">📂 2. Population & Context</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">📂 3. [Your Phenomenon]</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">📂 4. Methodology & Methods</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">📂 5. Emergent Themes</div>
+                        <div style="margin: 1.5em 0 0.5em 0;">🏷️ Tags: #MustRead #Framework #Ch2-LitReview</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Obsidian Structure -->
+        <div class="slide" data-notes="Folder structure shows progression: inputs → processing → outputs. Numbered for sorting.">
+            <div class="slide-content">
+                <h2>Obsidian: Knowledge Workspace</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <div style="margin: 0.5em 0;">📁 Dissertation Vault</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">01 - Literature Notes <span style="color: #666;">(one per source)</span></div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">02 - Concept Notes <span style="color: #666;">(synthesis)</span></div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">03 - Framework Development</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">04 - Data & Analysis</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">05 - Writing Drafts</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">06 - Advisor Meetings</div>
+                        <div style="margin: 0.5em 0 0.5em 2em;">07 - Project Management</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 11: Literature Note -->
+        <div class="slide" data-notes="Not just summaries—active processing. Captures how source connects to YOUR study specifically.">
+            <div class="slide-content">
+                <h2>Literature Note: Active Processing</h2>
+                <div class="diagram">
+                    <div style="font-size: 1.1em; line-height: 1.8;">
+                        <div style="color: #CC0000; margin-bottom: 0.5em;">▸ Core argument in YOUR words</div>
+                        <div style="color: #CC0000; margin-bottom: 0.5em;">▸ Key concepts & definitions</div>
+                        <div style="color: #CC0000; margin-bottom: 0.5em;">▸ How it connects to YOUR study</div>
+                        <div style="color: #CC0000; margin-bottom: 0.5em;">▸ Questions it raises</div>
+                        <div style="color: #CC0000;">▸ Where you'll use it in dissertation</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 2em; font-size: 1.3em;">
+                    Not summaries → <span class="emphasis">Active scholarship</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Slide 12: Dashboard -->
+        <div class="slide" data-notes="Live project management—tracks current phase, weekly focus, wins, challenges, metrics. Dynamic, not static.">
+            <div class="slide-content">
+                <h2>Dashboard: Live Project Management</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 700px; margin: 0 auto; font-size: 0.95em;">
+                        <div style="margin: 1em 0; color: #CC0000;">CURRENT PHASE: Proposal Development</div>
+                        <div style="margin: 1em 0;">THIS WEEK'S FOCUS:</div>
+                        <div style="margin: 0.3em 0 0.3em 1em;">☐ Complete framework draft</div>
+                        <div style="margin: 0.3em 0 0.3em 1em;">☐ Finalize 3 literature notes</div>
+                        <div style="margin: 1em 0;">RECENT WINS:</div>
+                        <div style="margin: 0.3em 0 0.3em 1em;">✓ IRB submitted — 11/10</div>
+                        <div style="margin: 1em 0;">PROGRESS METRICS:</div>
+                        <div style="margin: 0.3em 0 0.3em 1em;">Literature notes: 15 / 30</div>
+                        <div style="margin: 0.3em 0 0.3em 1em;">Chapters drafted: 2 / 5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 13: Working WITH Claude -->
+        <div class="slide" data-notes="Show collaboration example: student customizing structure with Claude's guidance. Emphasize dialogue, not instruction-following.">
+            <div class="slide-content">
+                <h2>Collaboration in Action</h2>
+                <div class="box" style="background: #0a0a0a; padding: 2em;">
+                    <div style="font-size: 1.1em; line-height: 1.8;">
+                        <div style="color: #aaa; margin-bottom: 1em;">Student:</div>
+                        <div style="margin-bottom: 2em;">"I'm studying educational leadership in urban contexts. How should I adapt this Zotero collection structure?"</div>
+                        
+                        <div style="color: #aaa; margin-bottom: 1em;">Claude:</div>
+                        <div style="color: #ccc;">"Let me ask clarifying questions... [dialogue] ... For urban leadership, you might add collections for: Policy Context, Urban-Specific Challenges, Leadership Models in Urban Settings..."</div>
+                    </div>
+                </div>
+                <p style="text-align: center; margin-top: 2em; font-size: 1.4em; color: #CC0000;">
+                    Building systems collaboratively, not following instructions
+                </p>
+            </div>
+        </div>
+        
+        <!-- Slide 14: Why This Matters -->
+        <div class="slide" data-notes="Three key benefits: respects time, builds comprehensive database, supports transition to doctoral work.">
+            <div class="slide-content">
+                <h2>Why This Matters for You</h2>
+                <div class="grid-3">
+                    <div class="card" style="border-color: #CC0000;">
+                        <div class="card-title">Time Management</div>
+                        Modular design with built-in stopping points. Work in 30-minute chunks that fit your schedule.
+                    </div>
+                    <div class="card" style="border-color: #CC0000;">
+                        <div class="card-title">Growing Database</div>
+                        Literature from Year 1 connects to framework in Year 2, analysis in Year 3. Comprehensive context.
+                    </div>
+                    <div class="card" style="border-color: #CC0000;">
+                        <div class="card-title">Doctoral Transition</div>
+                        Demystifies doctoral work. Concrete workflows while building scholarly habits.
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 2em;">
+                    <strong>For incoming students:</strong> Start Module 1 now → build foundation that makes later modules easier
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 15: What's Available -->
+        <div class="slide" data-notes="Point to complete guide and LMS module. Emphasize optional nature—one approach among many.">
+            <div class="slide-content">
+                <h2>Available Resources</h2>
+                <div class="box" style="margin: 1.5em 0;">
+                    <div class="box-title">Complete Online Guide</div>
+                    Comprehensive instructions for all 5 modules<br>
+                    8 sections: Setup → Workflows → Ethics → Troubleshooting
+                </div>
+                <div class="box" style="margin: 1.5em 0;">
+                    <div class="box-title">LMS Video Module</div>
+                    30-minute walkthrough building Module 1<br>
+                    Hands-on with pause points, teaches working WITH Claude
+                </div>
+                <div class="box" style="margin: 1.5em 0; border-color: #666;">
+                    <div class="box-title" style="color: #aaa;">Remember</div>
+                    This is <span class="emphasis">optional</span> — one approach using free tools.<br>
+                    Use what fits your needs, adapt or build alternatives as you prefer.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 16: Closing -->
+        <div class="slide" data-notes="Invitation to explore system. Check guide, try LMS module, reach out with questions.">
+            <div class="slide-content">
+                <h2>Your Path Forward</h2>
+                <div style="text-align: center; font-size: 1.6em; line-height: 2; margin-top: 2em;">
+                    <p>Doctoral work is challenging.</p>
+                    <p style="margin-top: 1em;">It doesn't have to be chaotic.</p>
+                    <p style="margin-top: 2em; color: #CC0000;">Build sustainable workflows that support rigorous scholarship<br>while respecting your reality as working professionals.</p>
+                </div>
+                <div class="box" style="margin-top: 3em; text-align: center;">
+                    Check out the guide • Try the LMS module • Reach out with questions
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide-number" id="slideNumber">1 / 16</div>
+        
+        <div class="controls">
+            <button id="notesBtn">Notes</button>
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+        </div>
+        
+        <div class="notes-container" id="notesContainer">
+            <div class="notes-content" id="notesContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressFill = document.getElementById('progressFill');
+        const slideNumber = document.getElementById('slideNumber');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const notesBtn = document.getElementById('notesBtn');
+        const notesContainer = document.getElementById('notesContainer');
+        const notesContent = document.getElementById('notesContent');
+        
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideNumber.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            const notes = slides[currentSlide].getAttribute('data-notes');
+            notesContent.textContent = notes || 'No notes for this slide.';
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+        
+        function toggleNotes() {
+            notesContainer.classList.toggle('visible');
+        }
+        
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        notesBtn.addEventListener('click', toggleNotes);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                toggleNotes();
+            }
+        });
+        
+        updateSlide();
+    </script>
+</body>
+</html>
