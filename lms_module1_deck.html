@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 1: AI-Assisted Dissertation System - LMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #CC0000;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .slide {
+            flex: 1;
+            display: none;
+            padding: 60px 80px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        .slide.pause-slide {
+            background: linear-gradient(135deg, #1a0000 0%, #000 100%);
+            border: 3px solid #CC0000;
+        }
+        
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            color: #CC0000;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 2.5em;
+            font-weight: 600;
+            margin-bottom: 0.8em;
+            color: #CC0000;
+        }
+        
+        h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 0.6em;
+            color: #fff;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #aaa;
+            margin-bottom: 2em;
+        }
+        
+        ul {
+            list-style: none;
+            font-size: 1.4em;
+            line-height: 1.8;
+        }
+        
+        ul li {
+            margin: 0.8em 0;
+            padding-left: 1.5em;
+            position: relative;
+        }
+        
+        ul li:before {
+            content: "▸";
+            color: #CC0000;
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3em;
+            margin-top: 2em;
+        }
+        
+        .box {
+            background: #1a1a1a;
+            border: 2px solid #CC0000;
+            border-radius: 8px;
+            padding: 1.5em;
+            margin: 1em 0;
+            font-size: 1.2em;
+        }
+        
+        .box-title {
+            color: #CC0000;
+            font-weight: 600;
+            margin-bottom: 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .emphasis {
+            color: #CC0000;
+            font-weight: 600;
+        }
+        
+        .pause-icon {
+            font-size: 4em;
+            color: #CC0000;
+            margin-bottom: 0.3em;
+        }
+        
+        .pause-title {
+            font-size: 2.5em;
+            color: #CC0000;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+        }
+        
+        .pause-instruction {
+            font-size: 1.5em;
+            line-height: 1.6;
+            margin: 1em 0;
+            text-align: center;
+        }
+        
+        .claude-prompt {
+            background: #0a0a0a;
+            border: 2px solid #666;
+            border-radius: 8px;
+            padding: 1.5em;
+            margin: 1.5em 0;
+            font-size: 1.1em;
+            font-style: italic;
+            color: #ccc;
+        }
+        
+        .screenshot-placeholder {
+            background: #1a1a1a;
+            border: 2px dashed #666;
+            border-radius: 8px;
+            padding: 2.5em;
+            text-align: center;
+            color: #888;
+            font-size: 1.2em;
+            margin: 1.5em 0;
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        button {
+            background: #CC0000;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #990000;
+        }
+        
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+        
+        #notesBtn {
+            background: #666;
+            margin-right: 10px;
+        }
+        
+        #notesBtn:hover {
+            background: #888;
+        }
+        
+        .notes-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 3px solid #CC0000;
+            padding: 20px 40px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            z-index: 50;
+        }
+        
+        .notes-container.visible {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .notes-content {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #ddd;
+        }
+        
+        .notes-content ul {
+            font-size: 1em;
+            margin-left: 1em;
+        }
+        
+        .slide-number {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 2em 0;
+        }
+        
+        .flow-box {
+            background: #1a1a1a;
+            border: 2px solid #CC0000;
+            padding: 1.2em;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            margin: 0 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .flow-arrow {
+            color: #CC0000;
+            font-size: 2em;
+        }
+        
+        code {
+            background: #1a1a1a;
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            color: #CC0000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .guide-reference {
+            background: #0a0a0a;
+            border-left: 4px solid #CC0000;
+            padding: 1em 1.5em;
+            margin: 1.5em 0;
+            font-size: 1.1em;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <!-- PART 1: PURPOSE, PHILOSOPHY & MODULARITY -->
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active" data-notes="Welcome students. Set context: this is about building sustainable workflows for doctoral work while managing full-time jobs and life.">
+            <div class="slide-content">
+                <h1>AI-Assisted Dissertation<br>Management System</h1>
+                <p class="subtitle">Module 1: Reference & Knowledge Management</p>
+                <p class="subtitle" style="font-size: 1.2em; margin-top: 2em;">Building Sustainable Research Workflows</p>
+            </div>
+        </div>
+        
+        <!-- Slide 2: The Challenge -->
+        <div class="slide" data-notes="Acknowledge the reality: dissertation + full-time work + life. Need sustainable workflows, not just time hacks.">
+            <div class="slide-content">
+                <h2>The Doctoral Challenge</h2>
+                <ul>
+                    <li>Dissertation + full-time work + family + life</li>
+                    <li>Dozens or hundreds of sources to manage</li>
+                    <li>Multiple chapters, frameworks, data analysis</li>
+                    <li>Need consistent progress without burnout</li>
+                </ul>
+                <div class="box" style="margin-top: 2em;">
+                    Traditional advice doesn't solve the core problem:<br>
+                    <span class="emphasis">Building sustainable research workflows</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: What Sustainable Workflows Support -->
+        <div class="slide" data-notes="Primary goal is sustainability. These five elements support that goal.">
+            <div class="slide-content">
+                <h2>Sustainable Research Workflows</h2>
+                <h3>Support you in:</h3>
+                <ul>
+                    <li>Organizing and synthesizing literature effectively</li>
+                    <li>Developing stronger theoretical frameworks</li>
+                    <li>Managing data collection and analysis systematically</li>
+                    <li>Maintaining consistency across documents</li>
+                    <li>Actually tracking progress and staying accountable</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Working WITH AI -->
+        <div class="slide" data-notes="Core philosophy: AI as knowledgeable colleague in study session, not ghostwriter or task automator.">
+            <div class="slide-content">
+                <h2>Working WITH AI</h2>
+                <div class="box" style="margin-bottom: 2em;">
+                    Think of AI as a <span class="emphasis">knowledgeable colleague</span><br>you're having a study session with
+                </div>
+                <div class="flow-diagram">
+                    <div class="flow-box">You explain<br>your work</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">AI asks<br>questions</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box">You make<br>decisions</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: AI Roles -->
+        <div class="slide" data-notes="Four specific roles AI plays. Emphasize what it's NOT (in parentheses).">
+            <div class="slide-content">
+                <h2>AI Serves As Your:</h2>
+                <div class="two-column">
+                    <ul>
+                        <li>Strategic consultant<br><span style="color: #666; font-size: 0.8em;">(not a ghostwriter)</span></li>
+                        <li>Thinking partner<br><span style="color: #666; font-size: 0.8em;">(not a decision maker)</span></li>
+                    </ul>
+                    <ul>
+                        <li>Structure builder<br><span style="color: #666; font-size: 0.8em;">(not content generator)</span></li>
+                        <li>Accountability coach<br><span style="color: #666; font-size: 0.8em;">(not task automator)</span></li>
+                    </ul>
+                </div>
+                <div class="box" style="margin-top: 2em;">
+                    Time you invest "teaching" AI about your research<br>pays dividends in quality of support
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Academic Integrity - DO -->
+        <div class="slide" data-notes="VERY explicit boundaries. What AI appropriately does in this system.">
+            <div class="slide-content">
+                <h2>Academic Integrity: What AI Does</h2>
+                <div class="box" style="background: #0a1a0a; border-color: #0a0;">
+                    <div class="box-title" style="color: #0c0;">✓ Appropriate Uses</div>
+                    <ul style="font-size: 1em;">
+                        <li>Provides organizational frameworks</li>
+                        <li>Offers synthesis strategies</li>
+                        <li>Asks clarifying questions to refine YOUR thinking</li>
+                        <li>Identifies gaps in YOUR reasoning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Academic Integrity - DON'T -->
+        <div class="slide" data-notes="Critical boundaries. The test: if you can't explain without referencing AI, you've crossed the line.">
+            <div class="slide-content">
+                <h2>Academic Integrity: What AI Does NOT Do</h2>
+                <div class="box" style="background: #1a0a0a; border-color: #a00;">
+                    <div class="box-title" style="color: #ff6666;">✗ Inappropriate Uses</div>
+                    <ul style="font-size: 1em;">
+                        <li>Write your dissertation</li>
+                        <li>Analyze your research data</li>
+                        <li>Make methodological decisions for you</li>
+                        <li>Replace your scholarly judgment</li>
+                    </ul>
+                </div>
+                <div class="box" style="margin-top: 1.5em;">
+                    <div class="box-title">The Test</div>
+                    If you can't explain a concept without referencing AI,<br>
+                    you've crossed from <span class="emphasis">consultation</span> into <span class="emphasis">dependence</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Five Modules -->
+        <div class="slide" data-notes="System has five modules. Don't need to build all at once—that's the key. Modular design respects your time.">
+            <div class="slide-content">
+                <h2>Five Modules (Build as Needed)</h2>
+                <ul>
+                    <li><span class="emphasis">Module 1:</span> Reference & Knowledge Management</li>
+                    <li><span class="emphasis">Module 2:</span> Theoretical Framework Development</li>
+                    <li><span class="emphasis">Module 3:</span> Literature Review System</li>
+                    <li><span class="emphasis">Module 4:</span> Qualitative Analysis Support</li>
+                    <li><span class="emphasis">Module 5:</span> Project Management & Accountability</li>
+                </ul>
+                <div class="box" style="margin-top: 2em;">
+                    <span class="emphasis">Modular Design:</span> Start with one, add next when you need it<br>
+                    Built-in stopping points—work in 30-minute chunks
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Live Project Management -->
+        <div class="slide" data-notes="Key benefit: live vs. static. Your notes connect, ideas build, system grows with you. Database, not just folders.">
+            <div class="slide-content">
+                <h2>Live Project Management</h2>
+                <div class="box" style="font-size: 1.4em; padding: 2em;">
+                    Not static file systems<br><br>
+                    <span class="emphasis" style="font-size: 1.2em;">Dynamic, integrated workflows</span><br><br>
+                    Your notes connect • Ideas build • System grows with you
+                </div>
+                <div class="guide-reference" style="margin-top: 2em;">
+                    Building this now creates comprehensive personal database<br>
+                    you'll use throughout your entire program
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Transition to Hands-On -->
+        <div class="slide" data-notes="We're building together, not just following steps. Emphasize collaboration with Claude.">
+            <div class="slide-content">
+                <h2>Ready to Build</h2>
+                <h3>Today: Module 1</h3>
+                <div class="flow-diagram">
+                    <div class="flow-box" style="border-color: #0a0;">
+                        <strong>Zotero</strong><br>
+                        Reference Storage
+                    </div>
+                    <div class="flow-arrow">⟷</div>
+                    <div class="flow-box" style="border-color: #0a0;">
+                        <strong>Obsidian</strong><br>
+                        Knowledge Synthesis
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 2em; font-size: 1.3em;">
+                    We're building <span class="emphasis">in collaboration with Claude</span><br>
+                    Not just following directions
+                </div>
+                <div class="guide-reference" style="margin-top: 1.5em;">
+                    <strong>⏸️ PAUSE markers:</strong> Stop video, do the work, resume when ready
+                </div>
+            </div>
+        </div>
+        
+        <!-- PART 2: ZOTERO + OBSIDIAN WALKTHROUGH -->
+        
+        <!-- Slide 11: Walkthrough Introduction -->
+        <div class="slide" data-notes="Set up what we're building: integrated system where Zotero manages citations, Obsidian develops thinking.">
+            <div class="slide-content">
+                <h2>Building Your Integrated System</h2>
+                <div class="two-column">
+                    <div class="box">
+                        <div class="box-title">Zotero Handles</div>
+                        <ul style="font-size: 0.9em;">
+                            <li>PDF storage</li>
+                            <li>Citation management</li>
+                            <li>Metadata organization</li>
+                            <li>Formatted references</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <div class="box-title">Obsidian Handles</div>
+                        <ul style="font-size: 0.9em;">
+                            <li>Literature notes</li>
+                            <li>Concept synthesis</li>
+                            <li>Framework building</li>
+                            <li>Progress tracking</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 2em;">
+                    <span class="emphasis">Key Principle:</span> Separate reference storage from knowledge synthesis<br>
+                    while maintaining seamless flow between them
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 12: Zotero Collections -->
+        <div class="slide" data-notes="Collection structure mirrors dissertation chapters. Top folder stays empty—it's container, sources live in subcollections.">
+            <div class="slide-content">
+                <h2>Step 1: Zotero Collections</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 700px; margin: 0 auto; line-height: 2;">
+                        <div>📁 My Library</div>
+                        <div style="margin-left: 2em;">📁 Archive - Previous Work</div>
+                        <div style="margin-left: 2em;">📁 Dissertation - [Your Project]</div>
+                        <div style="margin-left: 4em;">📂 1. Core Theory & Framework</div>
+                        <div style="margin-left: 4em;">📂 2. Population & Context</div>
+                        <div style="margin-left: 4em;">📂 3. [Your Phenomenon]</div>
+                        <div style="margin-left: 4em;">📂 4. Methodology & Methods</div>
+                        <div style="margin-left: 4em;">📂 5. Emergent Themes</div>
+                        <div style="margin-left: 4em;">📂 6. Supplementary</div>
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 1em;">
+                    Structure mirrors dissertation chapters—sources organized by where they'll be used
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 13: PAUSE - Zotero Collections -->
+        <div class="slide pause-slide" data-notes="First hands-on work. Students create their collection structure. Emphasize working with Claude to customize.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create Your Collections</div>
+                <div class="pause-instruction">
+                    Set up this collection structure in your Zotero<br>
+                    Name your dissertation folder for your specific research<br>
+                    Customize subcollections if your structure differs
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "I'm studying [your topic]. How should I adapt this Zotero collection structure for my research?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Detailed steps:</strong> See Section 4, Phase 2, Step 2.1 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 14: Zotero Tags -->
+        <div class="slide" data-notes="Tags add second dimension. Collections = where used (chapters), tags = how/why/priority. Multi-dimensional organization.">
+            <div class="slide-content">
+                <h2>Step 2: Zotero Tags</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="font-size: 1.3em;">By Chapter</h3>
+                        <ul style="font-size: 1em;">
+                            <li>#Ch1-Introduction</li>
+                            <li>#Ch2-LitReview</li>
+                            <li>#Ch3-Methodology</li>
+                            <li>#Ch4-Findings</li>
+                            <li>#Ch5-Discussion</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.3em;">By Priority & Function</h3>
+                        <ul style="font-size: 1em;">
+                            <li>#MustRead</li>
+                            <li>#ShouldRead</li>
+                            <li>#Framework</li>
+                            <li>#Methods</li>
+                            <li>#Empirical</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 1.5em;">
+                    Collections organize by <span class="emphasis">where</span> you'll use sources<br>
+                    Tags organize by <span class="emphasis">how, why, and priority</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 15: PAUSE - Zotero Tags -->
+        <div class="slide pause-slide" data-notes="Create starter tag system. Can add theme-based tags later as patterns emerge from data.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create Your Tags</div>
+                <div class="pause-instruction">
+                    Create these tags in Zotero<br>
+                    Customize based on your program's chapter requirements<br>
+                    You'll add theme tags later as patterns emerge
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "Based on my research on [topic], what tags should I add to this system?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Detailed steps:</strong> See Section 4, Phase 2, Step 2.2 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 16: Annotation Template -->
+        <div class="slide" data-notes="Template ensures consistency. Capture same info from every source. Not just summaries—active processing.">
+            <div class="slide-content">
+                <h2>Step 3: Annotation Template</h2>
+                <div class="box" style="font-size: 1em; text-align: left;">
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Core argument (in YOUR words)</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Key concepts & definitions</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Relevant findings/claims</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Important quotes (with page numbers)</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Connection to MY study</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Questions this raises</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Dissertation sections where it will be used</div>
+                    <div style="color: #CC0000; margin: 0.5em 0;">▸ Metadata (date, status, priority)</div>
+                </div>
+                <div class="guide-reference" style="margin-top: 1em;">
+                    Consistency now = easy retrieval 9 months from now
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 17: PAUSE - Annotation Template -->
+        <div class="slide pause-slide" data-notes="Save template somewhere accessible. This becomes standard for every source.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Save Template</div>
+                <div class="pause-instruction">
+                    Save this template in an accessible location<br>
+                    You'll use it as your standard for every source
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "I'm doing [type of research] using [methodology]. Should I modify this annotation template?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Complete template:</strong> See Section 4, Phase 2, Step 2.3 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 18: Obsidian Vault -->
+        <div class="slide" data-notes="Obsidian folder structure shows progression: inputs → processing → outputs. Numbers enforce sorting.">
+            <div class="slide-content">
+                <h2>Step 4: Obsidian Vault Structure</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 700px; margin: 0 auto; line-height: 2;">
+                        <div>📁 Dissertation Vault</div>
+                        <div style="margin-left: 2em;">00 - Inbox <span style="color: #666;">(quick captures)</span></div>
+                        <div style="margin-left: 2em;">01 - Literature Notes <span style="color: #666;">(one per source)</span></div>
+                        <div style="margin-left: 2em;">02 - Concept Notes <span style="color: #666;">(synthesis)</span></div>
+                        <div style="margin-left: 2em;">03 - Framework Development</div>
+                        <div style="margin-left: 2em;">04 - Data & Analysis</div>
+                        <div style="margin-left: 2em;">05 - Writing Drafts</div>
+                        <div style="margin-left: 2em;">06 - Advisor Meetings</div>
+                        <div style="margin-left: 2em;">07 - Project Management</div>
+                    </div>
+                </div>
+                <div class="box" style="margin-top: 1em;">
+                    Progressive flow: input → processing → output
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 19: PAUSE - Obsidian Vault -->
+        <div class="slide pause-slide" data-notes="Create vault and folders. Customize if workflow differs from standard structure.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create Your Vault</div>
+                <div class="pause-instruction">
+                    Create new Obsidian vault for dissertation work<br>
+                    Set up these folders<br>
+                    Customize folder names if your workflow differs
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "I primarily work on [type of tasks]. Should I modify this Obsidian folder structure?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Detailed setup:</strong> See Section 4, Phase 3, Step 3.1 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 20: Dashboard -->
+        <div class="slide" data-notes="Dashboard is home base. Current phase, this week's focus, wins, challenges, metrics, next steps.">
+            <div class="slide-content">
+                <h2>Step 5: Build Your Dashboard</h2>
+                <div class="screenshot-placeholder">
+                    <div style="text-align: left; max-width: 800px; margin: 0 auto; font-size: 1em; line-height: 1.8;">
+                        <div style="color: #CC0000; margin: 0.5em 0;">CURRENT PHASE: [Where you are]</div>
+                        <div style="margin: 0.5em 0;">THIS WEEK'S FOCUS:</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">☐ Task 1</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">☐ Task 2</div>
+                        <div style="margin: 0.5em 0;">RECENT WINS:</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">✓ Achievement 1</div>
+                        <div style="margin: 0.5em 0;">CURRENT CHALLENGES:</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">• Challenge 1</div>
+                        <div style="margin: 0.5em 0;">PROGRESS METRICS:</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">Literature notes: XX / YY</div>
+                        <div style="margin: 0.5em 0;">NEXT STEPS:</div>
+                        <div style="margin: 0.3em 0 0.3em 2em;">1. Next action</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 21: PAUSE - Dashboard -->
+        <div class="slide pause-slide" data-notes="Create dashboard. Start filling in current status. This becomes first thing you see when opening Obsidian.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create Dashboard</div>
+                <div class="pause-instruction">
+                    Create <code>Dashboard.md</code> at root of your vault<br>
+                    Start filling in where you are right now<br>
+                    This becomes your home base
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    Share your current dissertation status with Claude and ask:<br>
+                    "What should I include on my dashboard right now?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Complete template:</strong> See Section 4, Phase 3, Step 3.2 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 22: Reading Log -->
+        <div class="slide" data-notes="Research journal, not busywork. Tracks what you're reading, learning, questions emerging. Evidence for methodology chapter.">
+            <div class="slide-content">
+                <h2>Step 6: Set Up Reading Log</h2>
+                <div class="box" style="font-size: 1.1em; text-align: left;">
+                    <div style="margin: 0.8em 0;"><span class="emphasis">Weekly Focus:</span> What you're reading for this week</div>
+                    <div style="margin: 0.8em 0;"><span class="emphasis">Source Table:</span> Author, status, dates, notes link</div>
+                    <div style="margin: 0.8em 0;"><span class="emphasis">Weekly Reflection:</span> What am I learning? What connections?</div>
+                    <div style="margin: 0.8em 0;"><span class="emphasis">Questions Emerging:</span> Track developing inquiry</div>
+                </div>
+                <div class="guide-reference" style="margin-top: 1.5em;">
+                    This is your research journal—evidence for methodology chapter,<br>
+                    answers for "how did you develop this framework?"
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 23: PAUSE - Reading Log -->
+        <div class="slide pause-slide" data-notes="Create reading log in project management folder. Set up first week's focus.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create Reading Log</div>
+                <div class="pause-instruction">
+                    Create <code>Reading Log.md</code> in your Project Management folder<br>
+                    Set up your first week's entry<br>
+                    Identify what you're reading for right now
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "I'm in [program phase] working on [current task]. What should my reading focus be this week?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Template and guidance:</strong> See Section 4, Phase 3, Step 3.3 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 24: Connecting Zotero + Obsidian -->
+        <div class="slide" data-notes="Plugin connects the two systems. Information flows from Zotero into Obsidian notes automatically.">
+            <div class="slide-content">
+                <h2>Step 7: Connect the Systems</h2>
+                <h3>Install Zotero Integration Plugin</h3>
+                <ul style="font-size: 1.2em;">
+                    <li>Obsidian: Settings → Community Plugins</li>
+                    <li>Disable 'Restricted Mode'</li>
+                    <li>Browse → Search 'Zotero Integration'</li>
+                    <li>Install plugin by mgmeyers</li>
+                    <li>Enable the plugin</li>
+                    <li>Test: Open Zotero + Command Palette (Ctrl/Cmd+P)</li>
+                    <li>Try importing one source to verify connection</li>
+                </ul>
+                <div class="guide-reference" style="margin-top: 1em;">
+                    When working, you can pull citations from Zotero directly into notes
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 25: PAUSE - Plugin Installation -->
+        <div class="slide pause-slide" data-notes="Install and test plugin. Make sure both apps talking to each other. Troubleshoot if needed.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Install & Test Plugin</div>
+                <div class="pause-instruction">
+                    Install Zotero Integration plugin in Obsidian<br>
+                    Test connection with both apps open<br>
+                    Verify you can import source information
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    If you get errors: "I'm getting [this error] when connecting Zotero and Obsidian. What should I try?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Installation & troubleshooting:</strong> See Section 4, Phase 3, Step 3.4 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 26: Literature Note Process -->
+        <div class="slide" data-notes="Put it all together. Not summarizing—processing. Thinking about what it means for YOUR study.">
+            <div class="slide-content">
+                <h2>Step 8: Create Literature Note</h2>
+                <h3>The Process</h3>
+                <ul style="font-size: 1.2em;">
+                    <li>Pick one source from Zotero</li>
+                    <li>Create note in Obsidian: <code>01 - Literature Notes</code></li>
+                    <li>Use Zotero Integration to import citation</li>
+                    <li>Apply your annotation template</li>
+                    <li>Work through source, filling each section</li>
+                    <li>Link to concept notes as connections emerge</li>
+                </ul>
+                <div class="box" style="margin-top: 1.5em; font-size: 1.3em;">
+                    Not summarizing → <span class="emphasis">Processing</span><br>
+                    Active scholarship, developing expertise
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 27: PAUSE - First Literature Note -->
+        <div class="slide pause-slide" data-notes="Create complete literature note. Take time. Work with Claude to think through connections to your research.">
+            <div class="slide-content" style="text-align: center;">
+                <div class="pause-icon">⏸️</div>
+                <div class="pause-title">PAUSE: Create First Note</div>
+                <div class="pause-instruction">
+                    Create your first complete literature note<br>
+                    Take your time—this is active scholarship<br>
+                    Work with Claude to think through connections
+                </div>
+                <div class="claude-prompt">
+                    <strong>Working with Claude:</strong><br>
+                    "I'm reading [source] about [topic]. How does this connect to my research on [your focus]?"<br>
+                    "This author defines [concept] as [X]. How is this similar to/different from [other theorist]?"<br>
+                    "I'm not sure how to use this source. Can you help me think through the connection?"
+                </div>
+                <div class="guide-reference">
+                    <strong>Examples and guidance:</strong> See Section 5, Workflow 1 in the guide
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 28: What You've Built -->
+        <div class="slide" data-notes="Recap everything they've accomplished. More importantly—they've learned HOW to work with Claude.">
+            <div class="slide-content">
+                <h2>What You've Built</h2>
+                <ul>
+                    <li>✅ Zotero collection structure aligned with dissertation</li>
+                    <li>✅ Multi-dimensional tagging system</li>
+                    <li>✅ Consistent annotation template</li>
+                    <li>✅ Obsidian vault with organized workspace</li>
+                    <li>✅ Dashboard for tracking progress</li>
+                    <li>✅ Reading log for documenting journey</li>
+                    <li>✅ Connected systems that talk to each other</li>
+                    <li>✅ Your first complete literature note</li>
+                </ul>
+                <div class="box" style="margin-top: 1.5em; font-size: 1.3em;">
+                    More importantly: You've learned<br>
+                    <span class="emphasis">HOW to work with Claude</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 29: What Comes Next -->
+        <div class="slide" data-notes="Ongoing use: create notes, see patterns, build concepts, track progress. Add modules as needed. Work with Claude.">
+            <div class="slide-content">
+                <h2>Moving Forward</h2>
+                <h3>As you continue:</h3>
+                <ul style="font-size: 1.3em;">
+                    <li>Create literature notes for each source</li>
+                    <li>Start seeing patterns → build concept notes</li>
+                    <li>Track progress on dashboard weekly</li>
+                    <li>Reflect in reading log regularly</li>
+                </ul>
+                <div class="box" style="margin-top: 2em;">
+                    <div class="box-title">Ready for More Modules?</div>
+                    When working on proposal: Add Module 2 (Theoretical Framework)<br>
+                    When starting data collection: Add Module 4 (Qualitative Analysis)<br>
+                    <br>
+                    <span class="emphasis">Work with Claude to build those too</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 30: Closing -->
+        <div class="slide" data-notes="Core principle reminder. You're scholar, Claude is tool. Complete guide available. Questions welcome.">
+            <div class="slide-content">
+                <h2>Remember</h2>
+                <div style="text-align: center; font-size: 1.6em; line-height: 2; margin: 2em 0;">
+                    <p><span class="emphasis">AI augments your scholarship</span></p>
+                    <p style="margin-top: 1em;">It doesn't replace it</p>
+                    <p style="margin-top: 2em;">You're the scholar<br>Claude is your colleague<br>Together you build sustainable workflows</p>
+                </div>
+                <div class="guide-reference" style="margin-top: 2em; text-align: center;">
+                    <strong>Complete guide with all modules:</strong><br>
+                    [Guide URL]<br><br>
+                    <strong>Questions?</strong> [Contact info]
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide-number" id="slideNumber">1 / 30</div>
+        
+        <div class="controls">
+            <button id="notesBtn">Notes</button>
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+        </div>
+        
+        <div class="notes-container" id="notesContainer">
+            <div class="notes-content" id="notesContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressFill = document.getElementById('progressFill');
+        const slideNumber = document.getElementById('slideNumber');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const notesBtn = document.getElementById('notesBtn');
+        const notesContainer = document.getElementById('notesContainer');
+        const notesContent = document.getElementById('notesContent');
+        
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+            
+            slideNumber.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            
+            const notes = slides[currentSlide].getAttribute('data-notes');
+            notesContent.textContent = notes || 'No notes for this slide.';
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+        
+        function toggleNotes() {
+            notesContainer.classList.toggle('visible');
+        }
+        
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        notesBtn.addEventListener('click', toggleNotes);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                toggleNotes();
+            }
+        });
+        
+        updateSlide();
+    </script>
+</body>
+</html>
